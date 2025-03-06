@@ -436,3 +436,5 @@ fabric.properties
 *.jwk
 
 **/keys
+/src/ECommerce.Api/appsettings.local.json
+/src/ECommerce.Api/appsettings.json
