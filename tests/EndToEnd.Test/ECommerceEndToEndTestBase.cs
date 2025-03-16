@@ -1,7 +1,7 @@
-﻿namespace EndToEnd.Test;
+namespace EndToEnd.Test;
 
 using BuildingBlocks.TestBase;
-using ECommerce.Data;
+using ECommerce.Infrastructure.Data;
 using Xunit;
 
 [Collection(EndToEndTestCollection.Name)]

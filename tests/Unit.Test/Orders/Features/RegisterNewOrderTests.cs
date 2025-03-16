@@ -1,6 +1,7 @@
-﻿namespace Unit.Test.Orders.Features;
+namespace Unit.Test.Orders.Features;
 
 using Common;
+using ECommerce.Infrastructure.Orders.Enums;
 using ECommerce.Orders.Enums;
 using ECommerce.Orders.Features.RegisteringNewOrder;
 using Fakes;

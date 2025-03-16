@@ -1,5 +1,6 @@
-﻿namespace Unit.Test.Inventories.Features;
+namespace Unit.Test.Inventories.Features;
 
+using ECommerce.Infrastructure.Inventories.ValueObjects;
 using ECommerce.Inventories.Features.AddingProductToInventory;
 using ECommerce.Inventories.ValueObjects;
 using FluentAssertions;

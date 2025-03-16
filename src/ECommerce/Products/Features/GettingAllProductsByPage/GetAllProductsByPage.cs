@@ -1,11 +1,11 @@
-﻿namespace ECommerce.Products.Features.GettingAllProductsByPage;
+namespace ECommerce.Products.Features.GettingAllProductsByPage;
 
 using Ardalis.GuardClauses;
 using AutoMapper;
 using BuildingBlocks.Core.Pagination;
 using BuildingBlocks.Web;
-using Data;
-using Dtos;
+using Infrastructure.Data;
+using ECommerce.Infrastructure.Data;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Services;
+using ECommerce.Infrastructure.Products.Dtos;
 
 public record GetProductsByPage
     (int PageNumber, int PageSize, string Filters, string SortOrder) : IPageQuery<GetProductsByPageResult>;

@@ -1,9 +1,8 @@
-﻿namespace ECommerce.Inventories.Features.GettingAllInventoryItemsByPage;
+namespace ECommerce.Inventories.Features.GettingAllInventoryItemsByPage;
 
 using AutoMapper;
 using BuildingBlocks.Web;
-using Data;
-using Dtos;
+using Infrastructure.Data;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -12,8 +11,10 @@ using Microsoft.AspNetCore.Routing;
 using Sieve.Services;
 using Ardalis.GuardClauses;
 using BuildingBlocks.Core.Pagination;
-using Enums;
 using Microsoft.EntityFrameworkCore;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Inventories.Enums;
+using ECommerce.Infrastructure.Inventories.Dtos;
 
 public record GetAllInventoryItemsByPage
 (int PageNumber, int PageSize, string Filters, string SortOrder,

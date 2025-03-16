@@ -1,12 +1,12 @@
-﻿namespace ECommerce.Categories.Features.CreatingCategory;
 
 using Ardalis.GuardClauses;
 using AutoMapper;
 using BuildingBlocks.Core.CQRS;
-using BuildingBlocks.Core.Event;
 using BuildingBlocks.Web;
-using Data;
-using Exceptions;
+using ECommerce.Infrastructure.Categories.Exceptions;
+using ECommerce.Infrastructure.Categories.Models;
+using ECommerce.Infrastructure.Categories.ValueObjects;
+using ECommerce.Infrastructure.Data;
 using FluentValidation;
 using MassTransit;
 using MediatR;
@@ -14,16 +14,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using ValueObjects;
 
+namespace ECommerce.Categories.Features.CreatingCategory;
 public record CreateCategory(string Name) : ICommand<CreateCategoryResult>
 {
     public Guid Id { get; init; } = NewId.NextGuid();
 }
 
 public record CreateCategoryResult(Guid Id);
-
-public record CategoryCreatedDomainEvent(Guid Id, string Name, bool IsDeleted) : IDomainEvent;
 
 public record CreateCategoryRequestDto(string Name);
 
@@ -33,15 +31,15 @@ public class CreateCategoryEndpoint : IMinimalEndpoint
 {
     public IEndpointRouteBuilder MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost($"{EndpointConfig.BaseApiPath}/catalog/category", async (CreateCategoryRequestDto request,
+        _ = builder.MapPost($"{EndpointConfig.BaseApiPath}/catalog/category", async (CreateCategoryRequestDto request,
                 IMediator mediator, IMapper mapper,
                 CancellationToken cancellationToken) =>
             {
-                var command = mapper.Map<CreateCategory>(request);
+                CreateCategory command = mapper.Map<CreateCategory>(request);
 
-                var result = await mediator.Send(command, cancellationToken);
+                CreateCategoryResult result = await mediator.Send(command, cancellationToken);
 
-                var response = new CreateCategoryResponseDto(result.Id);
+                CreateCategoryResponseDto response = new(result.Id);
 
                 return Results.Ok(response);
             })
@@ -62,7 +60,7 @@ public class CreateCategoryValidator : AbstractValidator<CreateCategory>
 {
     public CreateCategoryValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().WithMessage("Name must be not empty");
+        _ = RuleFor(x => x.Name).NotEmpty().WithMessage("Name must be not empty");
     }
 }
 
@@ -77,18 +75,18 @@ public class CreateCategoryHandler : ICommandHandler<CreateCategory, CreateCateg
 
     public async Task<CreateCategoryResult> Handle(CreateCategory request, CancellationToken cancellationToken)
     {
-        Guard.Against.Null(request, nameof(request));
+        _ = Guard.Against.Null(request, nameof(request));
 
-        var category = await _eCommerceDbContext.Categories.SingleOrDefaultAsync(x => x.Id == CategoryId.Of(request.Id), cancellationToken);
+        Category? category = await _eCommerceDbContext.Categories.SingleOrDefaultAsync(x => x.Id == CategoryId.Of(request.Id), cancellationToken);
 
         if (category is not null)
         {
             throw new CategoryAlreadyExistException();
         }
 
-        var categoryEntity = Models.Category.Create(CategoryId.Of(request.Id), Name.Of(request.Name));
+        Category categoryEntity = Category.Create(CategoryId.Of(request.Id), Name.Of(request.Name));
 
-        var newCategory = (await _eCommerceDbContext.Categories.AddAsync(categoryEntity, cancellationToken)).Entity;
+        Category newCategory = (await _eCommerceDbContext.Categories.AddAsync(categoryEntity, cancellationToken)).Entity;
 
         return new CreateCategoryResult(newCategory.Id.Value);
     }

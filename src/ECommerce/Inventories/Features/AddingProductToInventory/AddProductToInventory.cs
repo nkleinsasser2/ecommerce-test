@@ -1,14 +1,13 @@
-﻿namespace ECommerce.Inventories.Features.AddingProductToInventory;
 
 using Ardalis.GuardClauses;
 using AutoMapper;
 using BuildingBlocks.Core.CQRS;
-using BuildingBlocks.Core.Event;
 using BuildingBlocks.Web;
-using Data;
-using Enums;
-using ValueObjects;
-using ECommerce.Products.ValueObjects;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Inventories.Enums;
+using ECommerce.Infrastructure.Inventories.Models;
+using ECommerce.Infrastructure.Inventories.ValueObjects;
+using ECommerce.Infrastructure.Products.ValueObjects;
 using FluentValidation;
 using MassTransit;
 using MediatR;
@@ -16,14 +15,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using Models;
 
-public record ProductAddedToInventoryDomainEvent
-    (Guid Id, Guid InventoryId, Guid ProductId, ProductStatus Status, int Quantity) : IDomainEvent;
-
-public record ProductUpdatedToInventoryDomainEvent
-    (Guid Id, Guid InventoryId, Guid ProductId, ProductStatus Status, int Quantity) : IDomainEvent;
-
+namespace ECommerce.Inventories.Features.AddingProductToInventory;
 public record AddProductToInventory(Guid InventoryId, Guid ProductId, int Quantity) : ICommand<AddProductToInventoryResult>
 {
     public Guid Id { get; init; } = NewId.NextGuid();
@@ -39,16 +32,16 @@ public class AddProductToInventoryEndpoint : IMinimalEndpoint
 {
     public IEndpointRouteBuilder MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost($"{EndpointConfig.BaseApiPath}/inventory/add-product-to-inventory", async (
+        _ = builder.MapPost($"{EndpointConfig.BaseApiPath}/inventory/add-product-to-inventory", async (
                 AddProductToInventoryRequestDto request,
                 IMediator mediator, IMapper mapper,
                 CancellationToken cancellationToken) =>
             {
-                var command = mapper.Map<AddProductToInventory>(request);
+                AddProductToInventory command = mapper.Map<AddProductToInventory>(request);
 
-                var result = await mediator.Send(command, cancellationToken);
+                AddProductToInventoryResult result = await mediator.Send(command, cancellationToken);
 
-                var response = mapper.Map<AddProductToInventoryResponseDto>(result);
+                AddProductToInventoryResponseDto response = mapper.Map<AddProductToInventoryResponseDto>(result);
 
                 return Results.Ok(response);
             })
@@ -69,9 +62,9 @@ public class AddProductToInventoryValidator : AbstractValidator<AddProductToInve
 {
     public AddProductToInventoryValidator()
     {
-        RuleFor(x => x.ProductId).NotEmpty().WithMessage("ProductId must be not empty");
-        RuleFor(x => x.InventoryId).NotEmpty().WithMessage("InventoryId must be not empty");
-        RuleFor(x => x.Quantity).GreaterThan(0).WithMessage("Quantity must be greater than 0");
+        _ = RuleFor(x => x.ProductId).NotEmpty().WithMessage("ProductId must be not empty");
+        _ = RuleFor(x => x.InventoryId).NotEmpty().WithMessage("InventoryId must be not empty");
+        _ = RuleFor(x => x.Quantity).GreaterThan(0).WithMessage("Quantity must be greater than 0");
     }
 }
 
@@ -86,9 +79,9 @@ public class AddProductToInventoryHandler : ICommandHandler<AddProductToInventor
 
     public async Task<AddProductToInventoryResult> Handle(AddProductToInventory request, CancellationToken cancellationToken)
     {
-        Guard.Against.Null(request, nameof(request));
+        _ = Guard.Against.Null(request, nameof(request));
 
-        var productInventoryItems = await _eCommerceDbContext.InventoryItems
+        InventoryItems? productInventoryItems = await _eCommerceDbContext.InventoryItems
             .SingleOrDefaultAsync(
                 x => x.ProductId == ProductId.Of(request.ProductId) && x.Status == ProductStatus.InStock,
                 cancellationToken: cancellationToken);
@@ -100,16 +93,16 @@ public class AddProductToInventoryHandler : ICommandHandler<AddProductToInventor
                 ProductId.Of(request.ProductId),
                 Quantity.Of(request.Quantity + productInventoryItems.Quantity.Value));
 
-            _eCommerceDbContext.InventoryItems.Update(productInventoryItems);
+            _ = _eCommerceDbContext.InventoryItems.Update(productInventoryItems);
             return new AddProductToInventoryResult(productInventoryItems.Id.Value);
         }
 
-        var productInventoryItemsEntity = InventoryItems.AddProductToInventory(InventoryItemsId.Of(request.Id),
+        InventoryItems productInventoryItemsEntity = InventoryItems.AddProductToInventory(InventoryItemsId.Of(request.Id),
             InventoryId.Of(request.InventoryId),
             ProductId.Of(request.ProductId),
             Quantity.Of(request.Quantity));
 
-        await _eCommerceDbContext.InventoryItems.AddAsync(productInventoryItemsEntity, cancellationToken);
+        _ = await _eCommerceDbContext.InventoryItems.AddAsync(productInventoryItemsEntity, cancellationToken);
 
         return new AddProductToInventoryResult(productInventoryItemsEntity.Id.Value);
     }

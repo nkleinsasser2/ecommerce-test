@@ -1,5 +1,6 @@
-﻿namespace Unit.Test.Products.Features;
+namespace Unit.Test.Products.Features;
 
+using ECommerce.Infrastructure.Products.ValueObjects;
 using ECommerce.Products.Features.CreatingProduct;
 using ECommerce.Products.ValueObjects;
 using FluentAssertions;

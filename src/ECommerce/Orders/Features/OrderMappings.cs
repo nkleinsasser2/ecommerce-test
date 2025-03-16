@@ -1,18 +1,18 @@
-﻿namespace ECommerce.Orders.Features;
 
 using AutoMapper;
-using Dtos;
-using Models;
-using RegisteringNewOrder;
+using ECommerce.Infrastructure.Orders.Dtos;
+using ECommerce.Infrastructure.Orders.Models;
+using ECommerce.Orders.Features.RegisteringNewOrder;
 
+namespace ECommerce.Orders.Features;
 public class OrderMappings : Profile
 {
     public OrderMappings()
     {
-        CreateMap<RegisterNewOrderRequestDto, RegisterNewOrder>();
-        CreateMap<OrderItem, OrderItemDto>();
-        CreateMap<OrderItemDto, OrderItem>();
-        CreateMap<RegisterNewOrderResult, RegisterNewOrderResponseDto>();
+        _ = CreateMap<RegisterNewOrderRequestDto, RegisterNewOrder>();
+        _ = CreateMap<OrderItem, OrderItemDto>();
+        _ = CreateMap<OrderItemDto, OrderItem>();
+        _ = CreateMap<RegisterNewOrderResult, RegisterNewOrderResponseDto>();
     }
 }
 

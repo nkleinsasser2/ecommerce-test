@@ -1,5 +1,6 @@
-﻿namespace Unit.Test.Inventories.Domains;
+namespace Unit.Test.Inventories.Domains;
 
+using ECommerce.Infrastructure.Inventories.Models;
 using ECommerce.Inventories.Models;
 using FluentAssertions;
 using Unit.Test.Common;

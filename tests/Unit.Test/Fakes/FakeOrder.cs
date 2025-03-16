@@ -1,12 +1,18 @@
-﻿namespace Unit.Test.Fakes;
+using ECommerce.Infrastructure.Customers.ValueObjects;
+using ECommerce.Infrastructure.Products.ValueObjects;
+
+namespace Unit.Test.Fakes;
 
 using Common;
+using ECommerce.Infrastructure.Orders.Enums;
+using ECommerce.Infrastructure.Orders.Models;
+using ECommerce.Infrastructure.Orders.ValueObjects;
 using ECommerce.Orders.Enums;
 using ECommerce.Orders.Models;
 using ECommerce.Orders.ValueObjects;
 using MassTransit;
-using CustomerName = ECommerce.Customers.ValueObjects.Name;
-using ProductName = ECommerce.Products.ValueObjects.Name;
+using CustomerName = ECommerce.Infrastructure.Customers.ValueObjects.Name;
+using ProductName = Name;
 
 public sealed class FakeOrder
 {

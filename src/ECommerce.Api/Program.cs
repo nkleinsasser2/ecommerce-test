@@ -1,24 +1,24 @@
 using BuildingBlocks.OpenApi;
 using BuildingBlocks.Web;
 using ECommerce;
-using ECommerce.Extensions;
+using ECommerce.Infrastructure.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddMinimalEndpoints(assemblies: typeof(EcommerceRoot).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddCustomVersioning();
 builder.Services.AddAspnetOpenApi();
-builder.AddInfrastructure();
+builder.AddInfrastructure(typeof(EcommerceRoot).Assembly);
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.MapMinimalEndpoints();
 app.UseInfrastructure();
 
 if (!app.Environment.IsProduction())
 {
-    app.UseAspnetOpenApi();
+    _ = app.UseAspnetOpenApi();
 }
 
 app.Run();
@@ -26,7 +26,7 @@ app.Run();
 namespace ECommerce.Api
 {
     // For tests
-    public partial class Program
+    public partial class Programh
     {
     }
 }

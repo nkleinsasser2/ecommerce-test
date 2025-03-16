@@ -1,6 +1,7 @@
-﻿namespace Unit.Test.Fakes;
+namespace Unit.Test.Fakes;
 
 using AutoBogus;
+using ECommerce.Infrastructure.Orders.Dtos;
 using ECommerce.Orders.Dtos;
 using ECommerce.Orders.Features.RegisteringNewOrder;
 

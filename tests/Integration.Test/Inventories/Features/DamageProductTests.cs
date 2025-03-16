@@ -1,7 +1,9 @@
-﻿namespace Integration.Test.Inventories.Features;
+namespace Integration.Test.Inventories.Features;
 
 using BuildingBlocks.TestBase;
-using ECommerce.Data;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Inventories.Enums;
+using ECommerce.Infrastructure.Products.ValueObjects;
 using ECommerce.Inventories.Enums;
 using ECommerce.Products.ValueObjects;
 using Fakes;

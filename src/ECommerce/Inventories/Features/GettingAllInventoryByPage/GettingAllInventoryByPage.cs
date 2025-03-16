@@ -1,19 +1,19 @@
-﻿namespace ECommerce.Inventories.Features.GettingAllInventoryByPage;
 
+using Ardalis.GuardClauses;
 using AutoMapper;
+using BuildingBlocks.Core.Pagination;
 using BuildingBlocks.Web;
-using Data;
-using Dtos;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Inventories.Dtos;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Sieve.Services;
-using Ardalis.GuardClauses;
-using BuildingBlocks.Core.Pagination;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Services;
 
+namespace ECommerce.Inventories.Features.GettingAllInventoryByPage;
 public record GetAllInventoryByPage
     (int PageNumber, int PageSize, string Filters, string SortOrder) : IPageQuery<GetAllInventoryByPageResult>;
 
@@ -28,11 +28,11 @@ public class GetAllInventoryByPageValidator : AbstractValidator<GetAllInventoryB
 {
     public GetAllInventoryByPageValidator()
     {
-        RuleFor(x => x.PageNumber)
+        _ = RuleFor(x => x.PageNumber)
             .GreaterThanOrEqualTo(1)
             .WithMessage("Page should at least greater than or equal to 1.");
 
-        RuleFor(x => x.PageSize)
+        _ = RuleFor(x => x.PageSize)
             .GreaterThanOrEqualTo(1)
             .WithMessage("PageSize should at least greater than or equal to 1.");
     }
@@ -42,16 +42,16 @@ public class GetAllInventoryEndpoint : IMinimalEndpoint
 {
     public IEndpointRouteBuilder MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapGet($"{EndpointConfig.BaseApiPath}/catalog/get-all-inventory-by-page", async (
+        _ = builder.MapGet($"{EndpointConfig.BaseApiPath}/catalog/get-all-inventory-by-page", async (
                 [AsParameters] GetAllInventoryByPageRequestDto request,
                 IMediator mediator, IMapper mapper,
                 CancellationToken cancellationToken) =>
             {
-                var command = mapper.Map<GetAllInventoryByPage>(request);
+                GetAllInventoryByPage command = mapper.Map<GetAllInventoryByPage>(request);
 
-                var result = await mediator.Send(command, cancellationToken);
+                GetAllInventoryByPageResult result = await mediator.Send(command, cancellationToken);
 
-                var response = mapper.Map<GetAllInventoryByPageResponseDto>(result);
+                GetAllInventoryByPageResponseDto response = mapper.Map<GetAllInventoryByPageResponseDto>(result);
 
                 return Results.Ok(response);
             })
@@ -87,11 +87,11 @@ public class GetAllInventoryByPageHandler : IRequestHandler<GetAllInventoryByPag
 
     public async Task<GetAllInventoryByPageResult> Handle(GetAllInventoryByPage request, CancellationToken cancellationToken)
     {
-        Guard.Against.Null(request, nameof(request));
+        _ = Guard.Against.Null(request, nameof(request));
 
-        var pageList = await _eCommerceDbContext.Inventories.AsNoTracking().ApplyPagingAsync(request, _sieveProcessor, cancellationToken);
+        IPageList<Infrastructure.Inventories.Models.Inventory> pageList = await _eCommerceDbContext.Inventories.AsNoTracking().ApplyPagingAsync(request, _sieveProcessor, cancellationToken);
 
-        var result = _mapper.Map<PageList<InventoryDto>>(pageList);
+        PageList<InventoryDto> result = _mapper.Map<PageList<InventoryDto>>(pageList);
 
         return new GetAllInventoryByPageResult(result);
     }

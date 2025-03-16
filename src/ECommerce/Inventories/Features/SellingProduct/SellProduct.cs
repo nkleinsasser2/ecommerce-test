@@ -1,13 +1,18 @@
-﻿namespace ECommerce.Inventories.Features.SellingProduct;
+namespace ECommerce.Inventories.Features.SellingProduct;
 
 using Ardalis.GuardClauses;
 using AutoMapper;
 using BuildingBlocks.Core.CQRS;
-using BuildingBlocks.Core.Event;
 using BuildingBlocks.Web;
-using Data;
-using Enums;
-using Exceptions;
+using Infrastructure.Data;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Inventories.Enums;
+using ECommerce.Infrastructure.Inventories.Events;
+using ECommerce.Infrastructure.Inventories.Exceptions;
+using ECommerce.Infrastructure.Inventories.Models;
+using ECommerce.Infrastructure.Inventories.ValueObjects;
+using ECommerce.Infrastructure.Orders.Events;
+using ECommerce.Infrastructure.Products.ValueObjects;
 using FluentValidation;
 using MassTransit;
 using MediatR;
@@ -15,13 +20,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using Models;
-using Orders.Features.RegisteringNewOrder;
-using Products.ValueObjects;
-using ValueObjects;
-
-public record ProductSoldDomainEvent
-    (Guid Id, Guid InventoryId, Guid ProductId, ProductStatus Status, int Quantity) : IDomainEvent;
 
 public record SellProduct(Guid ProductId, int Quantity) : ICommand;
 

@@ -1,13 +1,13 @@
-﻿namespace ECommerce.Inventories.Features;
+namespace ECommerce.Inventories.Features;
 
 using AddingProductToInventory;
 using AutoMapper;
 using BuildingBlocks.Core.Pagination;
 using DamagingProduct;
-using Dtos;
+using ECommerce.Infrastructure.Inventories.Dtos;
+using ECommerce.Infrastructure.Inventories.Models;
 using GettingAllInventoryByPage;
 using GettingAllInventoryItemsByPage;
-using Models;
 using SellingProduct;
 
 public class InventoryMappings : Profile

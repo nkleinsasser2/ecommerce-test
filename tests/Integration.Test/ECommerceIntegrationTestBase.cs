@@ -1,7 +1,7 @@
-﻿namespace Integration.Test;
+namespace Integration.Test;
 
 using BuildingBlocks.TestBase;
-using ECommerce.Data;
+using ECommerce.Infrastructure.Data;
 using Xunit;
 
 

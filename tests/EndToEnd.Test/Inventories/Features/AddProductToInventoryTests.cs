@@ -1,9 +1,9 @@
-﻿namespace EndToEnd.Test.Inventories.Features;
+namespace EndToEnd.Test.Inventories.Features;
 
 using System.Net;
 using System.Net.Http.Json;
 using BuildingBlocks.TestBase;
-using ECommerce.Data;
+using ECommerce.Infrastructure.Data;
 using Fakes;
 using FluentAssertions;
 using Routes;

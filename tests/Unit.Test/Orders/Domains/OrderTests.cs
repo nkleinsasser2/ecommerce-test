@@ -1,6 +1,7 @@
-﻿namespace Unit.Test.Orders.Domains;
+namespace Unit.Test.Orders.Domains;
 
 using Common;
+using ECommerce.Infrastructure.Orders.Enums;
 using ECommerce.Orders.Enums;
 using ECommerce.Orders.Features.RegisteringNewOrder;
 using Fakes;

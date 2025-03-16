@@ -1,12 +1,15 @@
-﻿namespace ECommerce.Inventories.Features.DamagingProduct;
 
+using Ardalis.GuardClauses;
 using AutoMapper;
 using BuildingBlocks.Core.CQRS;
-using BuildingBlocks.Core.Event;
 using BuildingBlocks.Web;
-using Data;
-using Enums;
-using Exceptions;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Inventories.Enums;
+using ECommerce.Infrastructure.Inventories.Events;
+using ECommerce.Infrastructure.Inventories.Exceptions;
+using ECommerce.Infrastructure.Inventories.Models;
+using ECommerce.Infrastructure.Inventories.ValueObjects;
+using ECommerce.Infrastructure.Products.ValueObjects;
 using FluentValidation;
 using MassTransit;
 using MediatR;
@@ -14,14 +17,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using Models;
-using Products.ValueObjects;
-using ValueObjects;
-using Ardalis.GuardClauses;
 
-public record ProductDamagedDomainEvent
-    (Guid Id, Guid InventoryId, Guid ProductId, ProductStatus Status, int Quantity) : IDomainEvent;
-
+namespace ECommerce.Inventories.Features.DamagingProduct;
 public record DamageProduct(Guid ProductId, int Quantity) : ICommand;
 
 public record DamageProductRequestDto(Guid ProductId, int Quantity);
@@ -30,14 +27,14 @@ public class DamageProductEndpoint : IMinimalEndpoint
 {
     public IEndpointRouteBuilder MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost($"{EndpointConfig.BaseApiPath}/inventory/damage-product", async (
+        _ = builder.MapPost($"{EndpointConfig.BaseApiPath}/inventory/damage-product", async (
                 DamageProductRequestDto request,
                 IMediator mediator, IMapper mapper,
                 CancellationToken cancellationToken) =>
             {
-                var command = mapper.Map<DamageProduct>(request);
+                DamageProduct command = mapper.Map<DamageProduct>(request);
 
-                await mediator.Send(command, cancellationToken);
+                _ = await mediator.Send(command, cancellationToken);
 
                 return Results.NoContent();
             })
@@ -58,8 +55,8 @@ public class DamageProductValidator : AbstractValidator<DamageProduct>
 {
     public DamageProductValidator()
     {
-        RuleFor(x => x.ProductId).NotEmpty().WithMessage("ProductId must be not empty");
-        RuleFor(x => x.Quantity).GreaterThan(0).WithMessage("Quantity must be greater than 0");
+        _ = RuleFor(x => x.ProductId).NotEmpty().WithMessage("ProductId must be not empty");
+        _ = RuleFor(x => x.Quantity).GreaterThan(0).WithMessage("Quantity must be greater than 0");
     }
 }
 
@@ -74,9 +71,9 @@ public class DamageProductHandler : ICommandHandler<DamageProduct>
 
     public async Task<Unit> Handle(DamageProduct request, CancellationToken cancellationToken)
     {
-        Guard.Against.Null(request, nameof(request));
+        _ = Guard.Against.Null(request, nameof(request));
 
-        var productsInventoryItems = await _eCommerceDbContext.InventoryItems
+        InventoryItems? productsInventoryItems = await _eCommerceDbContext.InventoryItems
             .SingleOrDefaultAsync(
                 x => x.ProductId == ProductId.Of(request.ProductId) && x.Status == ProductStatus.InStock,
                 cancellationToken: cancellationToken);
@@ -94,7 +91,7 @@ public class DamageProductHandler : ICommandHandler<DamageProduct>
         productsInventoryItems.DamageProduct(productsInventoryItems.Id, productsInventoryItems.InventoryId,
             ProductId.Of(request.ProductId), Quantity.Of(request.Quantity));
 
-        _eCommerceDbContext.InventoryItems.Update(productsInventoryItems);
+        _ = _eCommerceDbContext.InventoryItems.Update(productsInventoryItems);
 
         return Unit.Value;
     }
@@ -110,16 +107,16 @@ public class DamageProductHandler : ICommandHandler<DamageProduct>
 
         public async Task Handle(ProductDamagedDomainEvent notification, CancellationToken cancellationToken)
         {
-            Guard.Against.Null(notification, nameof(notification));
+            _ = Guard.Against.Null(notification, nameof(notification));
 
-            var productInventoryItemsEntity = InventoryItems.AddProductToInventory(
+            InventoryItems productInventoryItemsEntity = InventoryItems.AddProductToInventory(
                 InventoryItemsId.Of(NewId.NextGuid()),
                 InventoryId.Of(notification.InventoryId),
                 ProductId.Of(notification.ProductId),
                 Quantity.Of(notification.Quantity),
                 ProductStatus.Damaged);
 
-            await _eCommerceDbContext.InventoryItems.AddAsync(productInventoryItemsEntity, cancellationToken);
+            _ = await _eCommerceDbContext.InventoryItems.AddAsync(productInventoryItemsEntity, cancellationToken);
             await _eCommerceDbContext.ExecuteTransactionalAsync(cancellationToken);
         }
     }

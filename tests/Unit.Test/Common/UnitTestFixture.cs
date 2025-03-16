@@ -1,7 +1,7 @@
-﻿namespace Unit.Test.Common
+namespace Unit.Test.Common
 {
     using AutoMapper;
-    using ECommerce.Data;
+    using ECommerce.Infrastructure.Data;
     using Xunit;
 
     [CollectionDefinition(nameof(UnitTestFixture))]

@@ -1,15 +1,13 @@
-﻿namespace ECommerce.Products.Features.CreatingProduct;
 
 using Ardalis.GuardClauses;
 using AutoMapper;
 using BuildingBlocks.Core.CQRS;
-using BuildingBlocks.Core.Event;
 using BuildingBlocks.Web;
-using ECommerce.Categories.ValueObjects;
-using ECommerce.Data;
-using ECommerce.Products.Exceptions;
-using ECommerce.Products.Models;
-using ECommerce.Products.ValueObjects;
+using ECommerce.Infrastructure.Categories.ValueObjects;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Products.Exceptions;
+using ECommerce.Infrastructure.Products.Models;
+using ECommerce.Infrastructure.Products.ValueObjects;
 using FluentValidation;
 using MassTransit;
 using MediatR;
@@ -17,8 +15,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using Name = ValueObjects.Name;
 
+namespace ECommerce.Products.Features.CreatingProduct;
 public record CreateProduct(string Name, string Barcode, bool Weighted,
     Guid CategoryId, decimal Price, decimal ProfitMargin, string Description) : ICommand<CreateProductResult>
 {
@@ -26,10 +24,6 @@ public record CreateProduct(string Name, string Barcode, bool Weighted,
 }
 
 public record CreateProductResult(Guid Id);
-
-public record ProductCreatedDomainEvent(Guid Id, string Name, string Barcode, bool Weighted, Guid CategoryId,
-    decimal Price, decimal ProfitMargin, decimal NetPrice,
-    string Description, bool IsDeleted) : IDomainEvent;
 
 public record CreateProductRequestDto(string Name, string Barcode, bool Weighted,
     Guid CategoryId, decimal Price, decimal ProfitMargin, string Description);
@@ -40,15 +34,15 @@ public class CreateProductEndpoint : IMinimalEndpoint
 {
     public IEndpointRouteBuilder MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost($"{EndpointConfig.BaseApiPath}/catalog/product", async (CreateProductRequestDto request,
+        _ = builder.MapPost($"{EndpointConfig.BaseApiPath}/catalog/product", async (CreateProductRequestDto request,
                 IMediator mediator, IMapper mapper,
                 CancellationToken cancellationToken) =>
             {
-                var command = mapper.Map<CreateProduct>(request);
+                CreateProduct command = mapper.Map<CreateProduct>(request);
 
-                var result = await mediator.Send(command, cancellationToken);
+                CreateProductResult result = await mediator.Send(command, cancellationToken);
 
-                var response = new CreateProductResponseDto(result.Id);
+                CreateProductResponseDto response = new(result.Id);
 
                 return Results.Ok(response);
             })
@@ -69,11 +63,11 @@ public class CreateProductValidator : AbstractValidator<CreateProduct>
 {
     public CreateProductValidator()
     {
-        RuleFor(x => x.Barcode).NotEmpty().WithMessage("Barcode must be not empty");
-        RuleFor(x => x.Name).NotEmpty().WithMessage("Name must be not empty");
-        RuleFor(x => x.CategoryId).NotEmpty().WithMessage("CategoryId must be not empty");
-        RuleFor(x => x.Price).GreaterThanOrEqualTo(0).WithMessage("Price must be equal or greater than 0");
-        RuleFor(x => x.ProfitMargin).GreaterThanOrEqualTo(0)
+        _ = RuleFor(x => x.Barcode).NotEmpty().WithMessage("Barcode must be not empty");
+        _ = RuleFor(x => x.Name).NotEmpty().WithMessage("Name must be not empty");
+        _ = RuleFor(x => x.CategoryId).NotEmpty().WithMessage("CategoryId must be not empty");
+        _ = RuleFor(x => x.Price).GreaterThanOrEqualTo(0).WithMessage("Price must be equal or greater than 0");
+        _ = RuleFor(x => x.ProfitMargin).GreaterThanOrEqualTo(0)
             .WithMessage("ProfitMargin must be equal or greater than 0");
     }
 }
@@ -89,9 +83,9 @@ public class CreateProductHandler : ICommandHandler<CreateProduct, CreateProduct
 
     public async Task<CreateProductResult> Handle(CreateProduct request, CancellationToken cancellationToken)
     {
-        Guard.Against.Null(request, nameof(request));
+        _ = Guard.Against.Null(request, nameof(request));
 
-        var product = await _eCommerceDbContext.Products.SingleOrDefaultAsync(x => x.Id == ProductId.Of(request.Id),
+        Product? product = await _eCommerceDbContext.Products.SingleOrDefaultAsync(x => x.Id == ProductId.Of(request.Id),
             cancellationToken);
 
         if (product is not null)
@@ -99,12 +93,12 @@ public class CreateProductHandler : ICommandHandler<CreateProduct, CreateProduct
             throw new ProductAlreadyExistException();
         }
 
-        var productEntity = Product.Create(ProductId.Of(request.Id), Name.Of(request.Name),
+        Product productEntity = Product.Create(ProductId.Of(request.Id), Infrastructure.Products.ValueObjects.Name.Of(request.Name),
             Barcode.Of(request.Barcode), request.Weighted, CategoryId.Of(request.CategoryId), Price.Of(request.Price),
             ProfitMargin.Of(request.ProfitMargin)
             , Description.Of(request.Description));
 
-        var newProduct = (await _eCommerceDbContext.Products.AddAsync(productEntity, cancellationToken)).Entity;
+        Product newProduct = (await _eCommerceDbContext.Products.AddAsync(productEntity, cancellationToken)).Entity;
 
         return new CreateProductResult(newProduct.Id.Value);
     }

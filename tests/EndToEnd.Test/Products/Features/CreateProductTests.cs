@@ -1,13 +1,13 @@
-﻿namespace EndToEnd.Test.Products.Features;
+namespace EndToEnd.Test.Products.Features;
 
 using System.Net;
 using System.Net.Http.Json;
 using BuildingBlocks.TestBase;
-using ECommerce.Data;
 using Fakes;
 using Routes;
 using FluentAssertions;
 using Xunit;
+using ECommerce.Infrastructure.Data;
 
 public class CreateProductTests : ECommerceEndToEndTestBase
 {

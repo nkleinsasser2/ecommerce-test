@@ -1,28 +1,28 @@
-﻿namespace ECommerce.Products.Features;
 
 using AutoMapper;
 using BuildingBlocks.Core.Pagination;
-using CreatingProduct;
-using Dtos;
-using GettingAllProductsByPage;
-using Models;
+using ECommerce.Infrastructure.Products.Dtos;
+using ECommerce.Infrastructure.Products.Models;
+using ECommerce.Products.Features.CreatingProduct;
+using ECommerce.Products.Features.GettingAllProductsByPage;
 
+namespace ECommerce.Products.Features;
 public class ProductMappings : Profile
 {
     public ProductMappings()
     {
-        CreateMap<CreateProductRequestDto, CreateProduct>();
-        CreateMap<CreateProduct, Product>();
-        CreateMap<Product, CreateProductResult>();
+        _ = CreateMap<CreateProductRequestDto, CreateProduct>();
+        _ = CreateMap<CreateProduct, Product>();
+        IMappingExpression<Product, CreateProductResult> mappingExpression = CreateMap<Product, CreateProductResult>();
 
-        CreateMap<GetProductsByPageResult, GetProductsByPageResponseDto>();
-        CreateMap<GetProductsByPageRequestDto, GetProductsByPage>();
+        _ = CreateMap<GetProductsByPageResult, GetProductsByPageResponseDto>();
+        _ = CreateMap<GetProductsByPageRequestDto, GetProductsByPage>();
 
-        CreateMap<Product, ProductDto>()
+        _ = CreateMap<Product, ProductDto>()
             .ConstructUsing(x =>
                 new ProductDto(x.Id, x.Name, x.Barcode, x.Description, x.CategoryId, x.IsBreakable, x.Price,
                     x.ProfitMargin, x.NetPrice));
 
-        CreateMap<PageList<Product>, PageList<ProductDto>>();
+        _ = CreateMap<PageList<Product>, PageList<ProductDto>>();
     }
 }

@@ -1,5 +1,7 @@
-﻿namespace Unit.Test.Inventories.Features;
+namespace Unit.Test.Inventories.Features;
 
+using ECommerce.Infrastructure.Inventories.Enums;
+using ECommerce.Infrastructure.Products.ValueObjects;
 using ECommerce.Inventories.Enums;
 using ECommerce.Inventories.Features.SellingProduct;
 using ECommerce.Products.ValueObjects;

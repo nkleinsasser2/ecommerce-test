@@ -1,11 +1,11 @@
-﻿namespace ECommerce.Categories.Features;
+namespace ECommerce.Categories.Features;
 
 using AutoMapper;
 using BuildingBlocks.Core.Pagination;
 using CreatingCategory;
-using Dtos;
+using ECommerce.Infrastructure.Categories.Dtos;
+using ECommerce.Infrastructure.Categories.Models;
 using GettingAllCategoriesByPage;
-using Models;
 
 public class CategoryMappings: Profile
 {

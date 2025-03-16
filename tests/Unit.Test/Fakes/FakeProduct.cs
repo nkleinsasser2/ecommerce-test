@@ -1,10 +1,14 @@
-﻿namespace Unit.Test.Fakes;
+using ECommerce.Infrastructure.Products.ValueObjects;
+
+namespace Unit.Test.Fakes;
 
 using ECommerce.Categories.ValueObjects;
+using ECommerce.Infrastructure.Categories.ValueObjects;
+using ECommerce.Infrastructure.Products.Models;
 using ECommerce.Products.Models;
 using ECommerce.Products.ValueObjects;
 using MassTransit;
-using Name = ECommerce.Products.ValueObjects.Name;
+using Name = Name;
 
 public sealed class FakeProduct
 {

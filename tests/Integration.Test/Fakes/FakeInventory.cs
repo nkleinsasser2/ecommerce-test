@@ -1,5 +1,7 @@
-﻿namespace Integration.Test.Fakes;
+namespace Integration.Test.Fakes;
 
+using ECommerce.Infrastructure.Inventories.Models;
+using ECommerce.Infrastructure.Inventories.ValueObjects;
 using ECommerce.Inventories.Models;
 using ECommerce.Inventories.ValueObjects;
 using MassTransit;

@@ -1,50 +1,28 @@
-﻿namespace ECommerce.Orders.Features.RegisteringNewOrder;
 
+using Ardalis.GuardClauses;
 using AutoMapper;
 using BuildingBlocks.Core.CQRS;
-using BuildingBlocks.Core.Event;
 using BuildingBlocks.Web;
-using Data;
-using Dtos;
-using Enums;
+using ECommerce.Infrastructure.Customers.ValueObjects;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Inventories.Enums;
+using ECommerce.Infrastructure.Inventories.Models;
+using ECommerce.Infrastructure.Orders.Dtos;
+using ECommerce.Infrastructure.Orders.Enums;
+using ECommerce.Infrastructure.Orders.Exceptions;
+using ECommerce.Infrastructure.Orders.Models;
+using ECommerce.Infrastructure.Orders.ValueObjects;
+using ECommerce.Infrastructure.Products.ValueObjects;
+using ECommerce.Inventories.Features.AddingProductToInventory;
 using FluentValidation;
-using Inventories.Enums;
-using Inventories.Features.AddingProductToInventory;
 using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using Ardalis.GuardClauses;
-using Customers.ValueObjects;
-using Exceptions;
-using Inventories.Models;
-using Models;
-using Products.ValueObjects;
-using ValueObjects;
 
-public record NewOrderRegisteredDomainEvent
-    (Guid Id, Guid InventoryId, Guid ProductId, int Quantity, OrderStatus Status) : IDomainEvent;
-
-public record OrderInitialedDomainEvent
-(Guid Id, Guid CustomerId, DiscountType DiscountType, decimal DiscountValue,
-    OrderStatus Status = OrderStatus.Pending, bool isDeleted = false) : IDomainEvent;
-
-public record OrderDiscountAppliedDomainEvent
-(Guid Id, Guid CustomerId, DiscountType DiscountType, decimal DiscountValue,
-    OrderStatus Status, bool isDeleted = false) : IDomainEvent;
-
-public record OrderShipmentAppliedDomainEvent
-(Guid Id, Guid CustomerId, IEnumerable<OrderItemDto> RegularOrderItems, IEnumerable<OrderItemDto> ExpressOrderItems,
-    OrderStatus Status, bool isDeleted = false) : IDomainEvent;
-
-public record OrderTotalPriceAddedDomainEvent
-(Guid Id, Guid CustomerId, DateTime OrderDate, decimal TotalPrice,
-    OrderStatus Status, IEnumerable<OrderItemDto> OrderItems, bool isDeleted = false) : IDomainEvent;
-
-public record OrderItemsAddedToOrderDomainEvent (IEnumerable<OrderItemDto> OrderItems) : IDomainEvent;
-
+namespace ECommerce.Orders.Features.RegisteringNewOrder;
 public record RegisterNewOrder(Guid CustomerId,
     IEnumerable<ItemDto> Items, DiscountType DiscountType, decimal DiscountValue, DateTime? OrderDate = null) : ICommand<RegisterNewOrderResult>
 {
@@ -66,16 +44,16 @@ public class RegisterNewOrderEndpoint : IMinimalEndpoint
 {
     public IEndpointRouteBuilder MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost($"{EndpointConfig.BaseApiPath}/order/register-new-order", async (
+        _ = builder.MapPost($"{EndpointConfig.BaseApiPath}/order/register-new-order", async (
                 RegisterNewOrderRequestDto request,
                 IMediator mediator, IMapper mapper,
                 CancellationToken cancellationToken) =>
             {
-                var command = mapper.Map<RegisterNewOrder>(request);
+                RegisterNewOrder command = mapper.Map<RegisterNewOrder>(request);
 
-                var result = await mediator.Send(command, cancellationToken);
+                RegisterNewOrderResult result = await mediator.Send(command, cancellationToken);
 
-                var response = mapper.Map<RegisterNewOrderResponseDto>(result);
+                RegisterNewOrderResponseDto response = mapper.Map<RegisterNewOrderResponseDto>(result);
 
                 return Results.Ok(response);
             })
@@ -96,13 +74,13 @@ public class RegisterNewOrderValidator : AbstractValidator<RegisterNewOrder>
 {
     public RegisterNewOrderValidator()
     {
-        RuleFor(x => x.CustomerId).NotEmpty().WithMessage("CustomerId must be not empty");
-        RuleFor(x => x.Items).NotEmpty().WithMessage("Items must be not empty");
-        RuleFor(x => x.Items.Count()).GreaterThan(0).WithMessage("Items must be greater than 0");
-        RuleFor(x => x.DiscountValue).GreaterThanOrEqualTo(0)
+        _ = RuleFor(x => x.CustomerId).NotEmpty().WithMessage("CustomerId must be not empty");
+        _ = RuleFor(x => x.Items).NotEmpty().WithMessage("Items must be not empty");
+        _ = RuleFor(x => x.Items.Count()).GreaterThan(0).WithMessage("Items must be greater than 0");
+        _ = RuleFor(x => x.DiscountValue).GreaterThanOrEqualTo(0)
             .WithMessage("DiscountValue must be equal or greater than 0");
 
-        RuleFor(x => x.DiscountType).Must(p => (p.GetType().IsEnum &&
+        _ = RuleFor(x => x.DiscountType).Must(p => (p.GetType().IsEnum &&
                                                 p == DiscountType.None) ||
                                                p == DiscountType.AmountDiscount ||
                                                p == DiscountType.PercentageDiscount)
@@ -121,9 +99,9 @@ public class RegisterNewOrderHandler : ICommandHandler<RegisterNewOrder, Registe
 
     public async Task<RegisterNewOrderResult> Handle(RegisterNewOrder request, CancellationToken cancellationToken)
     {
-        Guard.Against.Null(request, nameof(request));
+        _ = Guard.Against.Null(request, nameof(request));
 
-        var customer = await _eCommerceDbContext.Customers.FirstOrDefaultAsync(
+        Infrastructure.Customers.Models.Customer? customer = await _eCommerceDbContext.Customers.FirstOrDefaultAsync(
             x => x.Id == CustomerId.Of(request.CustomerId),
             cancellationToken: cancellationToken);
 
@@ -132,11 +110,11 @@ public class RegisterNewOrderHandler : ICommandHandler<RegisterNewOrder, Registe
             throw new CustomerNotExistException();
         }
 
-        var inventoryItems = new List<InventoryItems>();
+        List<InventoryItems> inventoryItems = [];
 
-        foreach (var orderItem in request.Items)
+        foreach (ItemDto orderItem in request.Items)
         {
-            var existItem =
+            InventoryItems? existItem =
                 await _eCommerceDbContext.InventoryItems.Include(i => i.Product).FirstOrDefaultAsync(x =>
                     x.ProductId == ProductId.Of(orderItem.ProductId) && x.Status == ProductStatus.InStock &&
                     x.Quantity.Value >= orderItem.Quantity, cancellationToken: cancellationToken);
@@ -149,19 +127,19 @@ public class RegisterNewOrderHandler : ICommandHandler<RegisterNewOrder, Registe
             inventoryItems.Add(existItem);
         }
 
-        var order = Order.Create(OrderId.Of(request.Id), customer, request.DiscountType, request.DiscountValue, OrderDate.Of(request.OrderDate ?? DateTime.Now));
+        Order order = Order.Create(OrderId.Of(request.Id), customer, request.DiscountType, request.DiscountValue, OrderDate.Of(request.OrderDate ?? DateTime.Now));
 
-        var orderItems = request.Items?.MapTo(order.Id, inventoryItems).ToList();
+        List<OrderItem>? orderItems = request.Items?.MapTo(order.Id, inventoryItems).ToList();
 
         order.AddItems(orderItems);
 
         order.CalculateTotalPrice();
 
-        var shipmentOrderResult = order.ApplyShipment();
+        (IEnumerable<OrderItemDto> ExpressShipmentItems, IEnumerable<OrderItemDto> RegularShipmentItems) = order.ApplyShipment();
 
         order.ApplyDiscount(request.DiscountType, request.DiscountValue);
 
-        await _eCommerceDbContext.Orders.AddAsync(order, cancellationToken);
+        _ = await _eCommerceDbContext.Orders.AddAsync(order, cancellationToken);
 
         if (orderItems != null)
         {
@@ -169,7 +147,7 @@ public class RegisterNewOrderHandler : ICommandHandler<RegisterNewOrder, Registe
         }
 
         return new RegisterNewOrderResult(order.Id.Value, customer.Id.Value, order.Status.ToString(), order.TotalPrice.Value,
-            order.OrderDate, shipmentOrderResult.RegularShipmentItems, shipmentOrderResult.ExpressShipmentItems,
+            order.OrderDate, RegularShipmentItems, ExpressShipmentItems,
             request.DiscountType.ToString(), request.DiscountValue);
     }
 }

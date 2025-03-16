@@ -1,7 +1,8 @@
-﻿namespace Integration.Test.Orders.Features;
+namespace Integration.Test.Orders.Features;
 
 using BuildingBlocks.TestBase;
-using ECommerce.Data;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Orders.Enums;
 using ECommerce.Orders.Enums;
 using Fakes;
 using FluentAssertions;

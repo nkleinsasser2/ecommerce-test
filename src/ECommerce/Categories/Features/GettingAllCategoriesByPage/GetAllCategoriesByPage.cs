@@ -1,9 +1,8 @@
-﻿namespace ECommerce.Categories.Features.GettingAllCategoriesByPage;
+namespace ECommerce.Categories.Features.GettingAllCategoriesByPage;
 
 using AutoMapper;
 using BuildingBlocks.Web;
-using Data;
-using Dtos;
+using Infrastructure.Data;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +12,8 @@ using Sieve.Services;
 using Ardalis.GuardClauses;
 using BuildingBlocks.Core.Pagination;
 using Microsoft.EntityFrameworkCore;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Categories.Dtos;
 
 public record GetCategoriesByPage
     (int PageNumber, int PageSize, string Filters, string SortOrder) : IPageQuery<GetCategoriesByPageResult>;

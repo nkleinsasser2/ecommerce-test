@@ -1,7 +1,7 @@
-﻿namespace Integration.Test.Products.Features;
+namespace Integration.Test.Products.Features;
 
 using BuildingBlocks.TestBase;
-using ECommerce.Data;
+using ECommerce.Infrastructure.Data;
 using Fakes;
 using FluentAssertions;
 using Xunit;

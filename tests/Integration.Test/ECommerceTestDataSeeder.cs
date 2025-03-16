@@ -1,6 +1,6 @@
 using BuildingBlocks.EFCore;
-using ECommerce.Data;
-using ECommerce.Data.Seed;
+using ECommerce.Infrastructure.Data;
+using ECommerce.Infrastructure.Data.Seed;
 using Microsoft.EntityFrameworkCore;
 namespace Integration.Test;
 

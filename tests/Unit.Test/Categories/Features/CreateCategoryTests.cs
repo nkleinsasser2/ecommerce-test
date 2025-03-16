@@ -1,7 +1,8 @@
-﻿namespace Unit.Test.Categories.Features;
+namespace Unit.Test.Categories.Features;
 
 using ECommerce.Categories.Features.CreatingCategory;
 using ECommerce.Categories.ValueObjects;
+using ECommerce.Infrastructure.Categories.ValueObjects;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Unit.Test.Common;

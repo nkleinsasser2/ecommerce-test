@@ -1,5 +1,9 @@
-﻿namespace EndToEnd.Test.Fakes;
+namespace EndToEnd.Test.Fakes;
 
+using ECommerce.Infrastructure.Inventories.Enums;
+using ECommerce.Infrastructure.Inventories.Models;
+using ECommerce.Infrastructure.Inventories.ValueObjects;
+using ECommerce.Infrastructure.Products.ValueObjects;
 using ECommerce.Inventories.Enums;
 using ECommerce.Inventories.Models;
 using ECommerce.Inventories.ValueObjects;

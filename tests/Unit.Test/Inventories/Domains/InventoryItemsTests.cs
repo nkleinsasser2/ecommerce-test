@@ -1,4 +1,4 @@
-﻿namespace Unit.Test.Inventories.Domains;
+namespace Unit.Test.Inventories.Domains;
 
 using ECommerce.Inventories.Enums;
 using ECommerce.Inventories.Features.AddingProductToInventory;
@@ -8,6 +8,7 @@ using FluentAssertions;
 using Common;
 using Fakes;
 using Xunit;
+using ECommerce.Infrastructure.Inventories.Enums;
 
 [Collection(nameof(UnitTestFixture))]
 public class InventoryItemsTests
