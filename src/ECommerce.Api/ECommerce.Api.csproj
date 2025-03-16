@@ -10,7 +10,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj" />
     <ProjectReference Include="..\BuildingBlocks\BuildingBlocks.csproj" />
-    <ProjectReference Include="..\ECommerce\ECommerce.csproj" />
   </ItemGroup>
 
 

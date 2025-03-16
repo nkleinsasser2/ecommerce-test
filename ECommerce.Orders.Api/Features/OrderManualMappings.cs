@@ -1,4 +1,3 @@
-
 using ECommerce.Infrastructure.Inventories.Models;
 using ECommerce.Infrastructure.Orders.Dtos;
 using ECommerce.Infrastructure.Orders.Models;
@@ -6,7 +5,7 @@ using ECommerce.Infrastructure.Orders.ValueObjects;
 using ECommerce.Infrastructure.Products.ValueObjects;
 using MassTransit;
 
-namespace ECommerce.Orders.Features;
+namespace ECommerce.Orders.Api.Features;
 public static class OrderManualMappings
 {
     public static IEnumerable<OrderItem> MapTo(this IEnumerable<ItemDto> items, OrderId id,

@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 
-namespace ECommerce.Categories.Features.CreatingCategory;
+namespace ECommerce.Categories.Api.Features.CreatingCategory;
 public record CreateCategory(string Name) : ICommand<CreateCategoryResult>
 {
     public Guid Id { get; init; } = NewId.NextGuid();

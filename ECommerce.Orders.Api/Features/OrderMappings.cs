@@ -2,9 +2,9 @@
 using AutoMapper;
 using ECommerce.Infrastructure.Orders.Dtos;
 using ECommerce.Infrastructure.Orders.Models;
-using ECommerce.Orders.Features.RegisteringNewOrder;
+using ECommerce.Orders.Api.Features.RegisteringNewOrder;
 
-namespace ECommerce.Orders.Features;
+namespace ECommerce.Orders.Api.Features;
 public class OrderMappings : Profile
 {
     public OrderMappings()

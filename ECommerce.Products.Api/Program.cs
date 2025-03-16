@@ -21,7 +21,7 @@ _ = app.UseAspnetOpenApi();
 
 app.Run();
 
-namespace ECommerce.Categories.Api
+namespace ECommerce.Orders.Api
 {
     // For tests
     public partial class Program

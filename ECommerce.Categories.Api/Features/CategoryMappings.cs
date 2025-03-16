@@ -1,8 +1,9 @@
-namespace ECommerce.Categories.Features;
+namespace ECommerce.Categories.Api.Features;
 
 using AutoMapper;
 using BuildingBlocks.Core.Pagination;
 using CreatingCategory;
+using ECommerce.Categories.Api.Features.GettingAllCategoriesByPage;
 using ECommerce.Infrastructure.Categories.Dtos;
 using ECommerce.Infrastructure.Categories.Models;
 using GettingAllCategoriesByPage;

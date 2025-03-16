@@ -1,4 +1,4 @@
-namespace ECommerce.Categories.Features.GettingAllCategoriesByPage;
+namespace ECommerce.Categories.Api.Features.GettingAllCategoriesByPage;
 
 using AutoMapper;
 using BuildingBlocks.Web;
