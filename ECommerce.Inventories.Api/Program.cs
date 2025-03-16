@@ -19,7 +19,8 @@ app.UseInfrastructure();
 
 _ = app.UseAspnetOpenApi();
 
-app.Run();
+app.Run("http://localhost:5030");
+
 
 namespace ECommerce.Orders.Api
 {

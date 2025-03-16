@@ -19,7 +19,7 @@ app.UseInfrastructure();
 
 _ = app.UseAspnetOpenApi();
 
-app.Run();
+app.Run("http://localhost:5020");
 
 namespace ECommerce.Categories.Api
 {

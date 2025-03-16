@@ -13,8 +13,6 @@ using ECommerce.Infrastructure.Orders.Exceptions;
 using ECommerce.Infrastructure.Orders.Models;
 using ECommerce.Infrastructure.Orders.ValueObjects;
 using ECommerce.Infrastructure.Products.ValueObjects;
-using ECommerce.Inventories.Features.AddingProductToInventory;
-using ECommerce.Orders.Api.Features;
 using FluentValidation;
 using MassTransit;
 using MediatR;
@@ -62,7 +60,7 @@ public class RegisterNewOrderEndpoint : IMinimalEndpoint
             .WithSummary("Register New Order")
             .WithDescription("Register New Order")
             .WithApiVersionSet(builder.NewApiVersionSet("Order").Build())
-            .Produces<AddProductToInventoryResponseDto>()
+            .Produces<RegisterNewOrderResponseDto>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithOpenApi()
             .HasApiVersion(1.0);
@@ -81,8 +79,8 @@ public class RegisterNewOrderValidator : AbstractValidator<RegisterNewOrder>
         _ = RuleFor(x => x.DiscountValue).GreaterThanOrEqualTo(0)
             .WithMessage("DiscountValue must be equal or greater than 0");
 
-        _ = RuleFor(x => x.DiscountType).Must(p => p.GetType().IsEnum &&
-                                                p == DiscountType.None ||
+        _ = RuleFor(x => x.DiscountType).Must(p => (p.GetType().IsEnum &&
+                                                p == DiscountType.None) ||
                                                p == DiscountType.AmountDiscount ||
                                                p == DiscountType.PercentageDiscount)
             .WithMessage("Status must be None, AmountDiscount or PercentageDiscount");
@@ -107,7 +105,9 @@ public class RegisterNewOrderHandler : ICommandHandler<RegisterNewOrder, Registe
             cancellationToken: cancellationToken);
 
         if (customer is null)
+        {
             throw new CustomerNotExistException();
+        }
 
         List<InventoryItems> inventoryItems = [];
 
@@ -119,7 +119,9 @@ public class RegisterNewOrderHandler : ICommandHandler<RegisterNewOrder, Registe
                     x.Quantity.Value >= orderItem.Quantity, cancellationToken: cancellationToken);
 
             if (existItem is null)
+            {
                 throw new OrderItemNotExistInInventoryException(orderItem.ProductId, orderItem.Quantity);
+            }
 
             inventoryItems.Add(existItem);
         }
@@ -139,7 +141,9 @@ public class RegisterNewOrderHandler : ICommandHandler<RegisterNewOrder, Registe
         _ = await _eCommerceDbContext.Orders.AddAsync(order, cancellationToken);
 
         if (orderItems != null)
+        {
             await _eCommerceDbContext.OrderItems.AddRangeAsync(orderItems, cancellationToken);
+        }
 
         return new RegisterNewOrderResult(order.Id.Value, customer.Id.Value, order.Status.ToString(), order.TotalPrice.Value,
             order.OrderDate, RegularShipmentItems, ExpressShipmentItems,
