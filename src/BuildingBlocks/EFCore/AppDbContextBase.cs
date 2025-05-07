@@ -1,7 +1,7 @@
 namespace BuildingBlocks.EFCore;
 
 using System.Collections.Immutable;
-using Core.Model;
+using BuildingBlocks.Core.Model;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Core.Event;
@@ -40,48 +40,80 @@ public abstract class AppDbContextBase : DbContext, IDbContext
         });
     }
 
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override int SaveChanges()
     {
+        OnBeforeSaving();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        OnBeforeSaving();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    //ref: https://www.meziantou.net/entity-framework-core-soft-delete-using-query-filters.htm
+    private void OnBeforeSaving()
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(x => x.State == EntityState.Added || x.State == EntityState.Modified || x.State == EntityState.Deleted)
+            .ToList();
+
+        foreach (var entry in entries)
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    OnBeforeAdd(entry);
+                    break;
+
+                case EntityState.Modified:
+                    OnBeforeModify(entry);
+                    break;
+
+                case EntityState.Deleted:
+                    OnBeforeDelete(entry);
+                    break;
+            }
+        }
+    }
+
+    private static void OnBeforeAdd(EntityEntry entry)
+    {
+        if (entry.Entity is not ISoftDeletable) return;
+
+        entry.CurrentValues[nameof(ISoftDeletable.IsDeleted)] = false;
+        entry.CurrentValues[nameof(ISoftDeletable.DeletedAt)] = null;
+        entry.CurrentValues[nameof(ISoftDeletable.DeletedBy)] = null;
+        entry.CurrentValues[nameof(ISoftDeletable.LastModified)] = DateTime.Now;
+        entry.CurrentValues[nameof(ISoftDeletable.LastModifiedBy)] = null;
+        entry.CurrentValues[nameof(ISoftDeletable.Version)] = 1;
+    }
+
+    private static void OnBeforeModify(EntityEntry entry)
+    {
+        if (entry.Entity is not ISoftDeletable) return;
+
+        entry.CurrentValues[nameof(ISoftDeletable.LastModified)] = DateTime.Now;
+        entry.CurrentValues[nameof(ISoftDeletable.LastModifiedBy)] = null;
+        entry.CurrentValues[nameof(ISoftDeletable.Version)] = (long)entry.CurrentValues[nameof(ISoftDeletable.Version)] + 1;
+    }
+
+    private static void OnBeforeDelete(EntityEntry entry)
+    {
+        if (entry.Entity is not ISoftDeletable) return;
+
         try
         {
-            foreach (var entry in ChangeTracker.Entries<IEntity>())
-            {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        entry.Entity.CreatedAt = DateTime.UtcNow;
-                        entry.Entity.CreatedBy = 1; // Default system user ID
-                        entry.Entity.LastModified = DateTime.UtcNow;
-                        entry.Entity.LastModifiedBy = 1; // Default system user ID
-                        break;
-
-                    case EntityState.Modified:
-                        entry.Entity.LastModified = DateTime.UtcNow;
-                        entry.Entity.LastModifiedBy = 1; // Default system user ID
-                        entry.Entity.Version++;
-                        break;
-
-                    case EntityState.Deleted:
-                        if (entry.Entity is ISoftDeletable softDeletableEntity)
-                        {
-                            entry.State = EntityState.Modified;
-                            softDeletableEntity.LastModified = DateTime.UtcNow;
-                            softDeletableEntity.LastModifiedBy = 1; // Default system user ID
-                            softDeletableEntity.IsDeleted = true;
-                            softDeletableEntity.DeletedAt = DateTime.UtcNow;
-                            softDeletableEntity.DeletedBy = 1; // Default system user ID
-                            softDeletableEntity.Version++;
-                        }
-                        break;
-                }
-            }
+            entry.State = EntityState.Modified;
+            entry.CurrentValues[nameof(ISoftDeletable.IsDeleted)] = true;
+            entry.CurrentValues[nameof(ISoftDeletable.DeletedAt)] = DateTime.Now;
+            entry.CurrentValues[nameof(ISoftDeletable.DeletedBy)] = null;
         }
         catch (Exception ex)
         {
-            throw;
+            // Log the error
         }
-
-        return await base.SaveChangesAsync(cancellationToken);
     }
 
     public IReadOnlyList<IDomainEvent> GetDomainEvents()

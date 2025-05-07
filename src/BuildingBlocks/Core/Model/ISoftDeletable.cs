@@ -4,5 +4,8 @@ public interface ISoftDeletable
 {
     bool IsDeleted { get; set; }
     DateTime? DeletedAt { get; set; }
-    int? DeletedBy { get; set; }
+    string? DeletedBy { get; set; }
+    DateTime? LastModified { get; set; }
+    string? LastModifiedBy { get; set; }
+    long Version { get; set; }
 } 
