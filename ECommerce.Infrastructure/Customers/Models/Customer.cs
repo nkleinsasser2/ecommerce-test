@@ -7,7 +7,7 @@ using Inventories.ValueObjects;
 using ValueObjects;
 using Name = ValueObjects.Name;
 
-public record Customer : Aggregate<CustomerId>
+public class Customer : Aggregate<CustomerId>
 {
     public Name Name { get; private set; }
     public Mobile Mobile { get; private set; }

@@ -9,7 +9,7 @@ using Products.Models;
 using Products.ValueObjects;
 using ValueObjects;
 
-public record InventoryItems : Aggregate<InventoryItemsId>
+public class InventoryItems : Aggregate<InventoryItemsId>
 {
     public InventoryId InventoryId { get; private set; }
     public Inventory Inventory { get; private set; }

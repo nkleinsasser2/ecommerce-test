@@ -8,7 +8,7 @@ docker-compose down
 
 # Rebuild all containers
 Write-Host "`nRebuilding all microservices..." -ForegroundColor Cyan
-docker-compose build --no-cache 
+docker-compose build #--no-cache 
 
 # Start all containers
 Write-Host "`nStarting all microservices..." -ForegroundColor Cyan

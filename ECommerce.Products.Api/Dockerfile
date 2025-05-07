@@ -14,18 +14,7 @@ RUN dotnet restore ECommerce.Products.Api/ECommerce.Products.Api.csproj
 COPY ECommerce.Products.Api/ ECommerce.Products.Api/
 COPY ECommerce.Infrastructure/ ECommerce.Infrastructure/
 COPY src/ECommerce/ src/ECommerce/
-COPY src/BuildingBlocks/Core/ src/BuildingBlocks/Core/
-COPY src/BuildingBlocks/EFCore/ src/BuildingBlocks/EFCore/
-COPY src/BuildingBlocks/Exception/ src/BuildingBlocks/Exception/
-COPY src/BuildingBlocks/Logging/ src/BuildingBlocks/Logging/
-COPY src/BuildingBlocks/OpenApi/ src/BuildingBlocks/OpenApi/
-COPY src/BuildingBlocks/Validation/ src/BuildingBlocks/Validation/
-COPY src/BuildingBlocks/Web/ src/BuildingBlocks/Web/
-COPY src/BuildingBlocks/BuildingBlocks.csproj src/BuildingBlocks/
-
-RUN mkdir -p src/BuildingBlocks/TestBase
-RUN touch src/BuildingBlocks/TestBase/Placeholder.cs
-RUN echo "namespace BuildingBlocks.TestBase { public class Placeholder {} }" > src/BuildingBlocks/TestBase/Placeholder.cs
+COPY src/BuildingBlocks/ src/BuildingBlocks/
 
 WORKDIR /app/ECommerce.Products.Api
 RUN dotnet nuget locals all --clear

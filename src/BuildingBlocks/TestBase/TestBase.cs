@@ -415,11 +415,11 @@ public abstract class TestWriteBase<TEntryPoint, TWContext> : TestFixtureCore<TE
     public new TestWriteFixture<TEntryPoint, TWContext> Fixture { get; }
 }
 
-public abstract class TestBase<TEntryPoint, TWContext> : TestFixtureCore<TEntryPoint>
+public abstract class TestBaseFixture<TEntryPoint, TWContext> : TestFixtureCore<TEntryPoint>
     where TEntryPoint : class
     where TWContext : DbContext
 {
-    protected TestBase(
+    protected TestBaseFixture(
         TestFixture<TEntryPoint, TWContext> integrationTestFixture, ITestOutputHelper outputHelper = null) :
         base(new TestFixture<TEntryPoint, DbContext>(), outputHelper)
     {

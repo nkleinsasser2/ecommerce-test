@@ -14,6 +14,17 @@ public class OrderItem : Entity<OrderItemId>
     public Order Order { get; init; }
     public Quantity Quantity { get; init; }
 
+    public static OrderItem Create(OrderItemId id, OrderId orderId, ProductId productId, Quantity quantity)
+    {
+        return new OrderItem
+        {
+            Id = id,
+            OrderId = orderId,
+            ProductId = productId,
+            Quantity = quantity
+        };
+    }
+
     public decimal CalculatePrice()
     {
         return Product.NetPrice.Value * Quantity.Value;

@@ -12,7 +12,7 @@ using JetBrains.Annotations;
 using ValueObjects;
 using Name = Name;
 
-public record Product : Aggregate<ProductId>
+public class Product : Aggregate<ProductId>
 {
     private NetPrice _netPrice;
     public Name Name { get; private set; }

@@ -5,7 +5,7 @@ using BuildingBlocks.Core.Model;
 using ECommerce.Infrastructure.Inventories.ValueObjects;
 using ValueObjects;
 
-public record Inventory: Aggregate<InventoryId>
+public class Inventory : Aggregate<InventoryId>
 {
     public Name Name { get; private set; }
 
