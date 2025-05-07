@@ -1,4 +1,3 @@
-
 using Ardalis.GuardClauses;
 using AutoMapper;
 using BuildingBlocks.Core.CQRS;
@@ -43,27 +42,25 @@ public class RegisterNewOrderEndpoint : IMinimalEndpoint
 {
     public IEndpointRouteBuilder MapEndpoint(IEndpointRouteBuilder builder)
     {
-        _ = builder.MapPost($"{EndpointConfig.BaseApiPath}/order/register-new-order", async (
+        var group = builder
+            .MapGroup("api/order");
+
+        group.MapPost("register-new-order", async (
                 RegisterNewOrderRequestDto request,
                 IMediator mediator, IMapper mapper,
                 CancellationToken cancellationToken) =>
             {
                 RegisterNewOrder command = mapper.Map<RegisterNewOrder>(request);
-
                 RegisterNewOrderResult result = await mediator.Send(command, cancellationToken);
-
                 RegisterNewOrderResponseDto response = mapper.Map<RegisterNewOrderResponseDto>(result);
-
                 return Results.Ok(response);
             })
             .WithName("Register New Order")
             .WithSummary("Register New Order")
             .WithDescription("Register New Order")
-            .WithApiVersionSet(builder.NewApiVersionSet("Order").Build())
             .Produces<RegisterNewOrderResponseDto>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .WithOpenApi()
-            .HasApiVersion(1.0);
+            .WithOpenApi();
 
         return builder;
     }

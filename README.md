@@ -1,47 +1,130 @@
-# 🛒 ECommerce-Microservices
+# 🛒 E-Commerce Microservices Architecture
 
-> **The primary objective of this project is transition a codebase with a monolith architecture to a microservice architecture to understand the required workflow and maintenance.** 🚀
+> This project demonstrates the transition from a monolithic architecture to a microservices-based architecture, showcasing best practices in service decomposition, API design, and containerization.
 
-> 💡 **This project is education-oriented and technical aspects mainly relate to changing startup processes and defining communication networks.**
+## 🚀 Quick Start
 
-## Technologies - Libraries
+### Prerequisites
+- Docker Desktop
+- Docker Compose
+- .NET 8.0 SDK (for local development)
 
-- ✔️ **[`.NET 9`](https://github.com/dotnet/aspnetcore)** - .NET Framework and .NET Core, including ASP.NET and ASP.NET Core.
-- ✔️ **[`MVC Versioning API`](https://github.com/microsoft/aspnet-api-versioning)** - Set of libraries which add service API versioning to ASP.NET Web API, OData with ASP.NET Web API, and ASP.NET Core.
-- ✔️ **[`EF Core`](https://github.com/dotnet/efcore)** - Modern object-database mapper for .NET. It supports LINQ queries, change tracking, updates, and schema migrations.
-- ✔️ **[`AspNetCore OpenApi`](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/openapi/aspnetcore-openapi?view=aspnetcore-9.0&tabs=visual-studio#configure-openapi-document-generation)** - Provides built-in support for OpenAPI document generation in ASP.NET Core.
-- ✔️ **[`MediatR`](https://github.com/jbogard/MediatR)** - Simple, unambitious mediator implementation in .NET.
-- ✔️ **[`FluentValidation`](https://github.com/FluentValidation/FluentValidation)** - Popular .NET validation library for building strongly-typed validation rules.
-- ✔️ **[`Swagger & Swagger UI`](https://github.com/domaindrivendev/Swashbuckle.AspNetCore)** - Swagger tools for documenting API's built on ASP.NET Core.
-- ✔️ **[`Serilog`](https://github.com/serilog/serilog)** - Simple .NET logging with fully-structured events.
-- ✔️ **[`Scrutor`](https://github.com/khellang/Scrutor)** - Assembly scanning and decoration extensions for Microsoft.Extensions.DependencyInjection.
-- ✔️ **[`AutoMapper`](https://github.com/AutoMapper/AutoMapper)** - Convention-based object-object mapper in .NET.
-- ✔️ **[`NewId`](https://github.com/phatboyg/NewId)** - NewId can be used as an embedded unique ID generator that produces 128 bit (16 bytes) sequential IDs.
-- ✔️ **[`Sieve`](https://github.com/Biarity/Sieve)** - Sieve is a framework for .NET Core that adds sorting, filtering, and pagination functionality out of the box.
-- ✔️ **[`xUnit.net`](https://github.com/xunit/xunit)** - A free, open source, community-focused unit testing tool for the .NET Framework.
-- ✔️ **[`Respawn`](https://github.com/jbogard/Respawn)** - Respawn is a small utility to help in resetting test databases to a clean state.
-- ✔️ **[`Testcontainers`](https://github.com/testcontainers/testcontainers-dotnet)** - Testcontainers for .NET is a library to support tests with throwaway instances of Docker containers.
-- ✔️ **[`Bogus`](https://github.com/bchavez/Bogus)** - Bogus is a simple fake data generator for .NET.
+### Running with Docker
 
-## Development Setup
+1. **Build and start all services**
+   ```bash
+   docker-compose up --build
+   ```
 
-### Dotnet Tools Packages
-For installing our requirement package with .NET cli tools, we need to install `dotnet tool manifest`.
+2. **Run tests**
+   ```bash
+   .\run-tests.ps1
+   ```
+
+3. **Access the APIs**
+   - Products API: http://localhost:5001/swagger
+   - Categories API: http://localhost:5002/swagger
+   - Orders API: http://localhost:5003/swagger
+   - Inventories API: http://localhost:5004/swagger
+
+## 🏗️ Architecture
+
+The application has been redesigned from a monolithic architecture to a microservices-based architecture with the following services:
+
+1. **Products API** (Port 5001)
+   - Product catalog management
+   - Product CRUD operations
+   - Product search and filtering
+
+2. **Categories API** (Port 5002)
+   - Category management
+   - Product categorization
+   - Category hierarchy
+
+3. **Orders API** (Port 5003)
+   - Order processing
+   - Order lifecycle management
+   - Order status tracking
+
+4. **Inventories API** (Port 5004)
+   - Inventory management
+   - Stock level tracking
+   - Inventory updates
+
+## 🛠️ Technology Stack
+
+- **.NET 8.0** - Core framework
+- **PostgreSQL** - Database
+- **Docker** - Containerization
+- **Docker Compose** - Service orchestration
+- **Swagger/OpenAPI** - API documentation
+- **MediatR** - CQRS implementation
+- **FluentValidation** - Request validation
+- **AutoMapper** - Object mapping
+- **xUnit** - Testing framework
+
+## 🔄 Development Workflow
+
+1. **Local Development**
+   ```bash
+   # Start services
+   docker-compose up -d
+
+   # Run tests
+   .\run-tests.ps1
+   ```
+
+2. **Adding New Features**
+   - Create feature in appropriate service
+   - Implement using CQRS pattern
+   - Add tests
+   - Update documentation
+
+## 📚 API Documentation
+
+Each service provides Swagger UI for API documentation:
+- Products API: http://localhost:5001/swagger
+- Categories API: http://localhost:5002/swagger
+- Orders API: http://localhost:5003/swagger
+- Inventories API: http://localhost:5004/swagger
+
+## 🧪 Testing
+
+The solution includes comprehensive test coverage:
+- Unit tests
+- Integration tests
+- End-to-end tests
+
+Run all tests using:
 ```bash
-dotnet new tool-manifest
-
-```
-And after that we can restore our dotnet tools packages with .NET cli tools from `.config` folder and `dotnet-tools.json` file.
-```bash
-dotnet tool restore
+.\run-tests.ps1
 ```
 
-## How to Run
+## 🔍 Troubleshooting
 
-You can run this app by defining the startup projects to include all of the relevant services upon startup.
+1. **Docker Issues**
+   - Ensure Docker Desktop is running
+   - Check container logs: `docker-compose logs`
+   - Verify port availability
 
-1. 
+2. **Database Issues**
+   - Check database container status
+   - Verify connection strings
+   - Check database logs
 
-## References
+3. **API Issues**
+   - Verify service health: `http://localhost:<port>/health`
+   - Check service logs
+   - Verify API documentation
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 🙏 Acknowledgments
 
 Thank you to the contributors from the [original codebase](https://github.com/meysamhadeli/ecommerce-monolith) from which we forked the project and performed our changes. 

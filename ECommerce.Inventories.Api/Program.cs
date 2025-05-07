@@ -1,6 +1,7 @@
 using BuildingBlocks.OpenApi;
 using BuildingBlocks.Web;
 using ECommerce.Infrastructure.Extensions;
+using ECommerce.Inventories.Api.Features.Health;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,12 +18,15 @@ WebApplication app = builder.Build();
 app.MapMinimalEndpoints();
 app.UseInfrastructure();
 
+// Map health check endpoint
+app.MapHealthEndpoints();
+
 _ = app.UseAspnetOpenApi();
 
-app.Run("http://localhost:5030");
+// Use the configured URLs from environment variables instead of hardcoding
+app.Run();
 
-
-namespace ECommerce.Orders.Api
+namespace ECommerce.Inventories.Api
 {
     // For tests
     public partial class Program

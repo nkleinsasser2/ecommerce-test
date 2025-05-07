@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  products-api:
+    build:
+      context: .
+      dockerfile: ECommerce.Products.Api/Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - PostgresOptions__ConnectionString=Host=postgres;Database=ecommerce;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./logs:/app/logs
+      - ./scripts:/app/scripts
+    restart: on-failure
+
+  categories-api:
+    build:
+      context: .
+      dockerfile: ECommerce.Categories.Api/Dockerfile
+    ports:
+      - "5002:5002"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - PostgresOptions__ConnectionString=Host=postgres;Database=ecommerce;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./logs:/app/logs
+      - ./scripts:/app/scripts
+    restart: on-failure
+
+  orders-api:
+    build:
+      context: .
+      dockerfile: ECommerce.Orders.Api/Dockerfile
+    ports:
+      - "5003:5003"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - PostgresOptions__ConnectionString=Host=postgres;Database=ecommerce;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./logs:/app/logs
+      - ./scripts:/app/scripts
+    restart: on-failure
+
+  inventories-api:
+    build:
+      context: .
+      dockerfile: ECommerce.Inventories.Api/Dockerfile
+    ports:
+      - "5004:5004"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - PostgresOptions__ConnectionString=Host=postgres;Database=ecommerce;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    volumes:
+      - ./logs:/app/logs
+      - ./scripts:/app/scripts
+    restart: on-failure
+
+  postgres:
+    image: postgres:16
+    container_name: ecommerce-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ecommerce"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
+volumes:
+  postgres-data: 

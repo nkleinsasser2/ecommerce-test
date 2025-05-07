@@ -1,6 +1,7 @@
 using BuildingBlocks.OpenApi;
 using BuildingBlocks.Web;
 using ECommerce.Infrastructure.Extensions;
+using ECommerce.Orders.Api.Features.Health;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,18 +9,26 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddMinimalEndpoints(assemblies: typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddCustomVersioning();
-builder.Services.AddAspnetOpenApi();
+
+// Configure OpenAPI without versioning
+builder.Services.AddSwaggerGen();
 builder.AddInfrastructure(typeof(Program).Assembly);
 
 WebApplication app = builder.Build();
 
 app.MapMinimalEndpoints();
+
 app.UseInfrastructure();
+app.MapHealthEndpoints();
 
-_ = app.UseAspnetOpenApi();
+// Configure Swagger UI without versioning
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Orders API V1");
+});
 
-app.Run("http://localhost:5010");
+app.Run();
 
 namespace ECommerce.Orders.Api
 {
