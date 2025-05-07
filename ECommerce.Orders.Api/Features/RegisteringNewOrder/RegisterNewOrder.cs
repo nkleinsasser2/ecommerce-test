@@ -107,13 +107,19 @@ public class RegisterNewOrderHandler : ICommandHandler<RegisterNewOrder, Registe
         }
 
         List<InventoryItems> inventoryItems = [];
+        List<OrderItem> orderItems = [];
 
         foreach (ItemDto orderItem in request.Items)
         {
             InventoryItems? existItem =
-                await _eCommerceDbContext.InventoryItems.Include(i => i.Product).FirstOrDefaultAsync(x =>
-                    x.ProductId == ProductId.Of(orderItem.ProductId) && x.Status == ProductStatus.InStock &&
-                    x.Quantity.Value >= orderItem.Quantity, cancellationToken: cancellationToken);
+                await _eCommerceDbContext.InventoryItems
+                    .Include(i => i.Product)
+                    .FirstOrDefaultAsync(x =>
+                        x.ProductId == ProductId.Of(orderItem.ProductId) && 
+                        x.Status == ProductStatus.InStock &&
+                        x.Quantity.Value >= orderItem.Quantity && 
+                        !x.IsDeleted,
+                        cancellationToken: cancellationToken);
 
             if (existItem is null)
             {
@@ -123,27 +129,53 @@ public class RegisterNewOrderHandler : ICommandHandler<RegisterNewOrder, Registe
             inventoryItems.Add(existItem);
         }
 
-        Order order = Order.Create(OrderId.Of(request.Id), customer, request.DiscountType, request.DiscountValue, OrderDate.Of(request.OrderDate ?? DateTime.Now));
+        Order order = Order.Create(
+            OrderId.Of(request.Id), 
+            customer, 
+            request.DiscountType, 
+            request.DiscountValue, 
+            OrderDate.Of(request.OrderDate ?? DateTime.Now));
 
-        List<OrderItem>? orderItems = request.Items?.MapTo(order.Id, inventoryItems).ToList();
+        foreach (var (item, inventoryItem) in request.Items.Zip(inventoryItems))
+        {
+            var orderItem = OrderItem.Create(
+                OrderItemId.Of(NewId.NextGuid()),
+                order.Id,
+                inventoryItem.ProductId,
+                Quantity.Of(item.Quantity));
+
+            // Set audit fields
+            orderItem.CreatedAt = DateTime.UtcNow;
+            orderItem.CreatedBy = 1; // System user
+            orderItem.LastModified = DateTime.UtcNow;
+            orderItem.LastModifiedBy = 1; // System user
+            orderItem.Version = 1;
+            orderItem.IsDeleted = false;
+
+            orderItems.Add(orderItem);
+        }
 
         order.AddItems(orderItems);
-
         order.CalculateTotalPrice();
 
         (IEnumerable<OrderItemDto> ExpressShipmentItems, IEnumerable<OrderItemDto> RegularShipmentItems) = order.ApplyShipment();
-
         order.ApplyDiscount(request.DiscountType, request.DiscountValue);
 
-        _ = await _eCommerceDbContext.Orders.AddAsync(order, cancellationToken);
+        await _eCommerceDbContext.Orders.AddAsync(order, cancellationToken);
+        await _eCommerceDbContext.OrderItems.AddRangeAsync(orderItems, cancellationToken);
 
-        if (orderItems != null)
-        {
-            await _eCommerceDbContext.OrderItems.AddRangeAsync(orderItems, cancellationToken);
-        }
+        // Save changes to persist the order and order items
+        await _eCommerceDbContext.SaveChangesAsync(cancellationToken);
 
-        return new RegisterNewOrderResult(order.Id.Value, customer.Id.Value, order.Status.ToString(), order.TotalPrice.Value,
-            order.OrderDate, RegularShipmentItems, ExpressShipmentItems,
-            request.DiscountType.ToString(), request.DiscountValue);
+        return new RegisterNewOrderResult(
+            order.Id.Value, 
+            customer.Id.Value, 
+            order.Status.ToString(), 
+            order.TotalPrice.Value,
+            order.OrderDate, 
+            RegularShipmentItems, 
+            ExpressShipmentItems,
+            request.DiscountType.ToString(), 
+            request.DiscountValue);
     }
 }

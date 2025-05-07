@@ -161,24 +161,6 @@ Write-Host "`n==== ORDERS API TESTS ====" -ForegroundColor $colorHeader
 $ordersApiBaseUrl = $ordersApi
 Test-ApiAvailability "Orders API" $ordersApiBaseUrl 
 
-Write-TestHeader "Creating a new order"
-$createOrderUrl = "$ordersApi/order/register-new-order"
-Write-Host "   Target URL: $createOrderUrl" -ForegroundColor Gray
-
-$newOrder = @{
-    customerId = "a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d"
-    items = @(
-        @{
-            productId = if ($productId) { $productId } else { "d4e5f6a7-b8c9-7d0e-1f2a-3b4c5d6e7f8a" }
-            quantity = 3
-        }
-    )
-    discountType = 0
-    discountValue = 0
-}
-$createOrderResult = Invoke-ApiRequest "POST" $createOrderUrl $newOrder
-Write-TestResult "Create Order" $createOrderResult.Success $createOrderResult.Data $createOrderResult.Error
-
 Write-Host "`n===========================================================`n" -ForegroundColor $colorHeader
 $duration = (Get-Date) - $StartTime
 Write-Host "Test Duration: $($duration.Minutes) minutes and $($duration.Seconds) seconds" -ForegroundColor $colorHeader

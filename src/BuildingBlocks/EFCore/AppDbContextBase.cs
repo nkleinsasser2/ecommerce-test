@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Core.Event;
 using Exception = System.Exception;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 public abstract class AppDbContextBase : DbContext, IDbContext
 {
@@ -16,6 +17,7 @@ public abstract class AppDbContextBase : DbContext, IDbContext
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        base.OnModelCreating(builder);
     }
 
     //ref: https://learn.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency#execution-strategies-and-transactions
@@ -40,7 +42,45 @@ public abstract class AppDbContextBase : DbContext, IDbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        OnBeforeSaving();
+        try
+        {
+            foreach (var entry in ChangeTracker.Entries<IEntity>())
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        entry.Entity.CreatedAt = DateTime.UtcNow;
+                        entry.Entity.CreatedBy = 1; // Default system user ID
+                        entry.Entity.LastModified = DateTime.UtcNow;
+                        entry.Entity.LastModifiedBy = 1; // Default system user ID
+                        break;
+
+                    case EntityState.Modified:
+                        entry.Entity.LastModified = DateTime.UtcNow;
+                        entry.Entity.LastModifiedBy = 1; // Default system user ID
+                        entry.Entity.Version++;
+                        break;
+
+                    case EntityState.Deleted:
+                        if (entry.Entity is ISoftDeletable softDeletableEntity)
+                        {
+                            entry.State = EntityState.Modified;
+                            softDeletableEntity.LastModified = DateTime.UtcNow;
+                            softDeletableEntity.LastModifiedBy = 1; // Default system user ID
+                            softDeletableEntity.IsDeleted = true;
+                            softDeletableEntity.DeletedAt = DateTime.UtcNow;
+                            softDeletableEntity.DeletedBy = 1; // Default system user ID
+                            softDeletableEntity.Version++;
+                        }
+                        break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+
         return await base.SaveChangesAsync(cancellationToken);
     }
 
@@ -59,47 +99,5 @@ public abstract class AppDbContextBase : DbContext, IDbContext
         domainEntities.ForEach(entity => entity.ClearDomainEvents());
 
         return domainEvents.ToImmutableList();
-    }
-
-    // ref: https://www.meziantou.net/entity-framework-core-generate-tracking-columns.htm
-    // ref: https://www.meziantou.net/entity-framework-core-soft-delete-using-query-filters.htm
-    private void OnBeforeSaving()
-    {
-        try
-        {
-            foreach (var entry in ChangeTracker.Entries<IEntity>())
-            {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        entry.Entity.CreatedAt = DateTime.Now;
-                        entry.Entity.CreatedBy = 1; // Default system user ID
-                        entry.Entity.LastModified = DateTime.Now; // Set LastModified on creation
-                        entry.Entity.LastModifiedBy = 1; // Set LastModifiedBy on creation
-                        break;
-
-                    case EntityState.Modified:
-                        entry.Entity.LastModified = DateTime.Now;
-                        entry.Entity.LastModifiedBy = 1; // Default system user ID
-                        entry.Entity.Version++;
-                        break;
-
-                    case EntityState.Deleted:
-                        if (entry.Entity is ISoftDeletable softDeletableEntity)
-                        {
-                            entry.State = EntityState.Modified;
-                            softDeletableEntity.LastModified = DateTime.Now;
-                            softDeletableEntity.LastModifiedBy = 1; // Default system user ID
-                            softDeletableEntity.IsDeleted = true;
-                            softDeletableEntity.Version++;
-                        }
-                        break;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
     }
 }

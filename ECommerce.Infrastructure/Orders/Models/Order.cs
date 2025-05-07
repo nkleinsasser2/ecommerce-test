@@ -13,7 +13,7 @@ using Enums;
 using Exceptions;
 using ValueObjects;
 
-public record Order : Aggregate<OrderId>
+public class Order : Aggregate<OrderId>
 {
     private readonly List<OrderItem> _orderItems = new List<OrderItem>();
     public CustomerId CustomerId { get; private set; }

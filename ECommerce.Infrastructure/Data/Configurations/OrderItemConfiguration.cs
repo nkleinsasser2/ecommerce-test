@@ -16,6 +16,12 @@ public class OrderItemConfiguration: IEntityTypeConfiguration<OrderItem>
             .HasConversion<Guid>(orderItemId => orderItemId.Value, dbId => OrderItemId.Of(dbId));
 
         builder.Property(r => r.IsDeleted);
+        
+        // Explicitly set required audit properties to NOT NULL
+        builder.Property(r => r.CreatedAt).IsRequired();
+        builder.Property(r => r.CreatedBy).IsRequired();
+        builder.Property(r => r.LastModified).IsRequired();
+        builder.Property(r => r.LastModifiedBy).IsRequired();
 
         builder.Property(r => r.Version).IsConcurrencyToken();
 
@@ -30,6 +36,12 @@ public class OrderItemConfiguration: IEntityTypeConfiguration<OrderItem>
         );
 
         builder.HasOne(x => x.Product).WithMany().HasForeignKey(x => x.ProductId);
-        builder.HasOne(x => x.Order).WithMany().HasForeignKey(x => x.OrderId);
+        
+        // Configure the relationship with Order properly - ensure it is required and cascade delete
+        builder.HasOne(x => x.Order)
+            .WithMany() // This avoids navigation property collision with the _orderItems field
+            .HasForeignKey(x => x.OrderId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

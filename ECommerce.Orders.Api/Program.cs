@@ -16,6 +16,11 @@ builder.AddInfrastructure(typeof(Program).Assembly);
 
 WebApplication app = builder.Build();
 
+// Add necessary middleware
+app.UseRouting();
+app.UseHttpsRedirection();
+app.UseAuthorization();
+
 app.MapMinimalEndpoints();
 
 // app.UseInfrastructure(); // This line triggers EF Core migrations which conflict with db-init

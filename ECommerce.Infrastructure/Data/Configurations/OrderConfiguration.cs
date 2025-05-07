@@ -47,5 +47,11 @@ public class OrderConfiguration: IEntityTypeConfiguration<Order>
         );
 
         builder.HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId);
+
+        // Explicitly configure the one-to-many relationship with OrderItem
+        // using the private backing field `_orderItems`.
+        builder.HasMany<OrderItem>("_orderItems") // Use the exact name of the private field
+            .WithOne(oi => oi.Order) // Specify the navigation property on OrderItem back to Order
+            .HasForeignKey(oi => oi.OrderId); // Specify the foreign key on OrderItem
     }
 }
