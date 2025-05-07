@@ -6,7 +6,7 @@ using ECommerce.Infrastructure.Products.Models;
 using ECommerce.Infrastructure.Products.ValueObjects;
 using ValueObjects;
 
-public record OrderItem : Entity<OrderItemId>
+public class OrderItem : Entity<OrderItemId>
 {
     public ProductId ProductId { get; init; }
     public Product Product { get; init; }

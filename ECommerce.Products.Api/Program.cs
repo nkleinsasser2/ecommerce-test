@@ -16,7 +16,7 @@ builder.AddInfrastructure(typeof(Program).Assembly);
 WebApplication app = builder.Build();
 
 app.MapMinimalEndpoints();
-app.UseInfrastructure();
+// app.UseInfrastructure(); // This line triggers EF Core migrations which conflict with db-init
 
 // Map health check endpoint
 app.MapHealthEndpoints();

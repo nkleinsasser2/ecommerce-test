@@ -8,6 +8,7 @@ COPY src/ECommerce/ECommerce.csproj src/ECommerce/
 
 COPY Directory.Build.props ./
 
+RUN dotnet nuget locals all --clear
 RUN dotnet restore ECommerce.Products.Api/ECommerce.Products.Api.csproj
 
 COPY ECommerce.Products.Api/ ECommerce.Products.Api/
@@ -27,6 +28,7 @@ RUN touch src/BuildingBlocks/TestBase/Placeholder.cs
 RUN echo "namespace BuildingBlocks.TestBase { public class Placeholder {} }" > src/BuildingBlocks/TestBase/Placeholder.cs
 
 WORKDIR /app/ECommerce.Products.Api
+RUN dotnet nuget locals all --clear
 RUN dotnet publish -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final

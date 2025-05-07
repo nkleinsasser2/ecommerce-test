@@ -18,7 +18,7 @@ WebApplication app = builder.Build();
 
 app.MapMinimalEndpoints();
 
-app.UseInfrastructure();
+// app.UseInfrastructure(); // This line triggers EF Core migrations which conflict with db-init
 app.MapHealthEndpoints();
 
 // Configure Swagger UI without versioning

@@ -14,9 +14,9 @@ docker-compose build
 Write-Host "`nStarting all microservices..." -ForegroundColor Cyan
 docker-compose up -d
 
-# Allow services to start up (wait for PostgreSQL and API services)
-Write-Host "`nWaiting for services to start up (10 seconds)..." -ForegroundColor Yellow
-Start-Sleep -Seconds 10
+# wait for 5 seconds for services to start  
+Write-Host "`nWaiting for 5 seconds for services to start..." -ForegroundColor Cyan
+Start-Sleep -Seconds 5
 
 # Run the tests
 Write-Host "`nRunning microservices tests..." -ForegroundColor Cyan

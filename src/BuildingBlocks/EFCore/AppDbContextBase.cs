@@ -67,36 +67,39 @@ public abstract class AppDbContextBase : DbContext, IDbContext
     {
         try
         {
-            foreach (var entry in ChangeTracker.Entries<IAggregate>())
+            foreach (var entry in ChangeTracker.Entries<IEntity>())
             {
-                var isAuditable = entry.Entity.GetType().IsAssignableTo(typeof(IAggregate));
-
-                if (isAuditable)
+                switch (entry.State)
                 {
-                    switch (entry.State)
-                    {
-                        case EntityState.Added:
-                            entry.Entity.CreatedAt = DateTime.Now;
-                            break;
+                    case EntityState.Added:
+                        entry.Entity.CreatedAt = DateTime.Now;
+                        entry.Entity.CreatedBy = 1; // Default system user ID
+                        entry.Entity.LastModified = DateTime.Now; // Set LastModified on creation
+                        entry.Entity.LastModifiedBy = 1; // Set LastModifiedBy on creation
+                        break;
 
-                        case EntityState.Modified:
-                            entry.Entity.LastModified = DateTime.Now;
-                            entry.Entity.Version++;
-                            break;
+                    case EntityState.Modified:
+                        entry.Entity.LastModified = DateTime.Now;
+                        entry.Entity.LastModifiedBy = 1; // Default system user ID
+                        entry.Entity.Version++;
+                        break;
 
-                        case EntityState.Deleted:
+                    case EntityState.Deleted:
+                        if (entry.Entity is ISoftDeletable softDeletableEntity)
+                        {
                             entry.State = EntityState.Modified;
-                            entry.Entity.LastModified = DateTime.Now;
-                            entry.Entity.IsDeleted = true;
-                            entry.Entity.Version++;
-                            break;
-                    }
+                            softDeletableEntity.LastModified = DateTime.Now;
+                            softDeletableEntity.LastModifiedBy = 1; // Default system user ID
+                            softDeletableEntity.IsDeleted = true;
+                            softDeletableEntity.Version++;
+                        }
+                        break;
                 }
             }
         }
         catch (Exception ex)
         {
-            throw new Exception("try for find IAggregate", ex);
+            throw;
         }
     }
 }

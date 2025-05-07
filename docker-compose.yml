@@ -11,8 +11,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - PostgresOptions__ConnectionString=Host=postgres;Database=ecommerce;Username=postgres;Password=postgres
     depends_on:
-      postgres:
-        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     networks:
       - ecommerce-network
     volumes:
@@ -30,8 +30,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - PostgresOptions__ConnectionString=Host=postgres;Database=ecommerce;Username=postgres;Password=postgres
     depends_on:
-      postgres:
-        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     networks:
       - ecommerce-network
     volumes:
@@ -49,8 +49,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - PostgresOptions__ConnectionString=Host=postgres;Database=ecommerce;Username=postgres;Password=postgres
     depends_on:
-      postgres:
-        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     networks:
       - ecommerce-network
     volumes:
@@ -68,8 +68,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - PostgresOptions__ConnectionString=Host=postgres;Database=ecommerce;Username=postgres;Password=postgres
     depends_on:
-      postgres:
-        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     networks:
       - ecommerce-network
     volumes:
@@ -96,6 +96,17 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  db-init:
+    image: postgres:16
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./scripts:/app/scripts
+    command: ["/bin/bash", "/app/scripts/init-db.sh"]
+    networks:
+      - ecommerce-network
 
 networks:
   ecommerce-network:
